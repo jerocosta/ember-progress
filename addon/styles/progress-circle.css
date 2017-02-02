@@ -1,4 +1,4 @@
 .progress circle {
-  transition: stroke-dashoffset 0.2s linear;
+  transition: all 0.2s ease;
   stroke: blue;
 }

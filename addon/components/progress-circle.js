@@ -146,4 +146,54 @@ export default Ember.Component.extend({
 
     return `rotate(-89.999, ${center}, ${center})`;
   }),
+  init: function() {
+    this._super();
+    this.set('_wasDelayed', false);
+    this.set('progressOriginal',this.get('progress'));
+    this.set('progress',0);
+  },
+  runProgress: function() {
+    let _this = this;
+    console.log('runProgress');
+    Ember.run.later( function() {
+      if(_this.get('progress') < _this.get('progressOriginal')) {
+        _this.set('progress', _this.get('progress') + 5);
+        _this.runProgress();
+      }
+    }, this.get('speed'));    
+  },
+  delayComplete: Ember.computed({
+    set(key2, val2) {
+      return val2;
+    },
+    get() {
+      var delay = this.get('delay');
+      var wasDelayed = this.get('_wasDelayed');
+
+      if (delay && !wasDelayed) {
+        this.set('_wasDelayed', true);
+
+        this.startDelayPolling(delay);
+
+        return false;
+      }
+      else {
+        return true;
+      }
+    }
+  }),  
+  startDelayPolling: function(delay) {
+    this._poller = Ember.run.later(this, () => {
+      this.set('delayComplete', true);
+      this.runProgress();
+
+    }, delay);
+  },
+  stopDelayPolling: function() {
+    Ember.run.cancel(this._poller);
+  },
+  willDestroy: function() {
+    this._super(...arguments);
+    this.stopDelayPolling();
+  },  
 });
